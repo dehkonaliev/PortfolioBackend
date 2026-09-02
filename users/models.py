@@ -4,6 +4,7 @@ from baseapp.models import BaseModel
 from django.utils import timezone
 from datetime import timedelta
 import secrets
+from .validators import validate_cover_image_size, validate_certification_size
 
 
 class CustomUser(AbstractUser, BaseModel):
@@ -13,12 +14,12 @@ class CustomUser(AbstractUser, BaseModel):
     phone_number = models.CharField(max_length=15, null=True, blank=True)
     linkedin_url = models.URLField(null=True, blank=True)
     profile_photo = models.ImageField(upload_to='avatars/', blank=True, null=True)
-    profile_thumbnail = models.ImageField(upload_to='avtars_thumb/', blank=True, null=True)
+    profile_thumbnail = models.ImageField(upload_to='avatars_thumb/', blank=True, null=True)
     
     
 class TempUser(BaseModel):
     email = models.EmailField(max_length=100)
-    code = models.IntegerField(max_length=6, blank=True, null=True)
+    code = models.IntegerField(blank=True, null=True)
     expiry_time = models.DateTimeField(default=timezone.now() + timedelta(minutes=15))
 
 
@@ -52,14 +53,16 @@ class Education(BaseModel):
     from_date = models.DateField()
     to_date = models.DateField()
     what_learnt = models.CharField(max_length=2000)
-    certification = models.FileField(upload_to='certifications/', blank=True, null=True)
+    certification = models.FileField(upload_to='certifications/', blank=True, null=True,
+                                     validators=[validate_certification_size])
     
 class Project(BaseModel):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='projects')
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=5000, null=True, blank=True)
     technologies = models.CharField(max_length=500, blank=True, null=True)
-    cover_image = models.ImageField(upload_to='porjects/', blank=True, null=True)
+    cover_image = models.ImageField(upload_to='projects/', blank=True, null=True,
+                                    validators=[validate_cover_image_size])
     url = models.URLField(null=True, blank=True)
     
     
