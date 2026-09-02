@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from baseapp.models import BaseModel
+from django.utils import timezone
+from datetime import timedelta
+import secrets
 
 
 class CustomUser(AbstractUser, BaseModel):
@@ -12,6 +15,12 @@ class CustomUser(AbstractUser, BaseModel):
     profile_photo = models.ImageField(upload_to='avatars/', blank=True, null=True)
     profile_thumbnail = models.ImageField(upload_to='avtars_thumb/', blank=True, null=True)
     
+    
+class TempUser(BaseModel):
+    email = models.EmailField(max_length=100)
+    code = models.IntegerField(max_length=6, blank=True, null=True)
+    expiry_time = models.DateTimeField(default=timezone.now() + timedelta(minutes=15))
+
 
 class Experience(BaseModel):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='experiences')
@@ -54,7 +63,7 @@ class Project(BaseModel):
     url = models.URLField(null=True, blank=True)
     
     
-    
-    
-
+class MyToken(BaseModel):
+    temp_user = models.ForeignKey(TempUser, on_delete=models.CASCADE, related_name='my_tokens')
+    token = models.CharField(max_length=32, default=secrets.token_urlsafe(32))
     
