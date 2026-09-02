@@ -17,9 +17,10 @@ class Experience(BaseModel):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='experiences')
     job = models.CharField(max_length=200)
     company = models.CharField(max_length=200)
+    activity = models.CharField(max_length=2000, blank=True, null=True)
     from_date = models.DateField()
     to_date = models.DateField()
-    location = models.CharField(max_length=300)
+    location = models.CharField(max_length=300, blank=True, null=True)
     
     
 class Language(BaseModel):
@@ -50,7 +51,7 @@ class Project(BaseModel):
     description = models.CharField(max_length=5000, null=True, blank=True)
     technologies = models.CharField(max_length=500, blank=True, null=True)
     cover_image = models.ImageField(upload_to='porjects/', blank=True, null=True)
-    link = models.URLField(null=True, blank=True)
+    url = models.URLField(null=True, blank=True)
     
     
     
