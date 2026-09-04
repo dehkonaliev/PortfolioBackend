@@ -10,6 +10,7 @@ from .views import (
     UpdateSettingsAPIView,
     ChangePasswordAPIView, DeleteAccountAPIView, UserSearchAPIView,
     FilterUserSearchAPIView, ProjectSearchAPIView,
+    SuggestionAPIView,
 )
 
 
@@ -35,6 +36,7 @@ urlpatterns = [
     path('users/search', UserSearchAPIView.as_view()),
     path('users/filter', FilterUserSearchAPIView.as_view()),
     path('projects/search', ProjectSearchAPIView.as_view()),
+    path('suggestions', SuggestionAPIView.as_view()),
     path('settings', UpdateSettingsAPIView.as_view()),
     path('change-password', ChangePasswordAPIView.as_view()),
     path('delete-account', DeleteAccountAPIView.as_view()),

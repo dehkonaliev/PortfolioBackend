@@ -1,11 +1,14 @@
 from django.shortcuts import render
-from .models import CustomUser, Project, Education, Experience, Skill, Language
+from .models import (
+    CustomUser, Project, Education, Experience, Skill, Language,
+    JobTitle, Technology, Field, SkillUnique,
+)
 from rest_framework.views import APIView
 from rest_framework import viewsets, mixins
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db.models import Q
-from baseapp.utils import success_response, error_response
+from baseapp.utils import success_response, error_response, register_usage
 from .permissions import IsOwnerOrReadOnly
 from .serializers import (
     TempUserSerializer, CreateAccountSerializer, VerifyCodeSerializer,
@@ -94,6 +97,7 @@ class BaseOwnerModelViewSet(mixins.CreateModelMixin,
                             mixins.ListModelMixin,
                             viewsets.GenericViewSet):
     permission_classes = [IsOwnerOrReadOnly]
+    usage_map = {}  # list of (lookup_model, lookup_field, serialized_field)
 
     def get_queryset(self):
         if getattr(self, 'swagger_fake_view', False):
@@ -104,12 +108,26 @@ class BaseOwnerModelViewSet(mixins.CreateModelMixin,
         return self.queryset.all()
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        instance = serializer.save(user=self.request.user)
+        self._register_usage(instance)
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        self._register_usage(instance)
+
+    def _register_usage(self, instance):
+        for model, lookup_field, source_field in self.usage_map:
+            value = getattr(instance, source_field, None)
+            register_usage(model, lookup_field, value)
 
 
 class ExperienceViewSet(BaseOwnerModelViewSet):
     queryset = Experience.objects.all().order_by('-created_at')
     serializer_class = ExperienceSerializer
+    usage_map = [
+        (JobTitle, 'job_title', 'job'),
+        (Technology, 'technology', 'company'),
+    ]
 
 
 class LanguageViewSet(BaseOwnerModelViewSet):
@@ -120,16 +138,25 @@ class LanguageViewSet(BaseOwnerModelViewSet):
 class SkillViewSet(BaseOwnerModelViewSet):
     queryset = Skill.objects.all().order_by('-created_at')
     serializer_class = SkillSerializer
+    usage_map = [
+        (SkillUnique, 'skill', 'name'),
+    ]
 
 
 class EducationViewSet(BaseOwnerModelViewSet):
     queryset = Education.objects.all().order_by('-created_at')
     serializer_class = EducationSerializer
+    usage_map = [
+        (Field, 'field', 'field'),
+    ]
 
 
 class ProjectViewSet(BaseOwnerModelViewSet):
     queryset = Project.objects.all().order_by('-created_at')
     serializer_class = ProjectSerializer
+    usage_map = [
+        (Technology, 'technology', 'technologies'),
+    ]
 
 
 class MyProfileAPIView(APIView):
@@ -169,6 +196,8 @@ class UpdateSettingsAPIView(APIView):
         serializer = UserUpdateSettingsSerializer(request.user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        if request.data.get('job_title'):
+            register_usage(JobTitle, 'job_title', request.data.get('job_title'))
         return success_response(message="Settings updated", data=serializer.data, status_code=200)
 
 
@@ -324,3 +353,45 @@ class ProjectSearchAPIView(APIView):
 
         serializer = ProjectSearchResultSerializer(qs, many=True)
         return success_response(message="Projects found", data=serializer.data, status_code=200)
+
+
+SUGGESTION_MODELS = {
+    'job_title': ('JobTitle', 'job_title'),
+    'technology': ('Technology', 'technology'),
+    'field': ('Field', 'field'),
+    'skill': ('SkillUnique', 'skill'),
+}
+
+
+class SuggestionAPIView(APIView):
+    """
+    Returns suggestion entries for a lookup type, ordered by usage_counts desc.
+    Query params:
+      - type : job_title | technology | field | skill
+      - q    : optional filter text
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        key = request.query_params.get('type', '').strip().lower()
+        q = request.query_params.get('q', '').strip()
+
+        if key not in SUGGESTION_MODELS:
+            return error_response(message="Invalid suggestion type", status_code=400)
+
+        model_name, field_name = SUGGESTION_MODELS[key]
+        model_map = {
+            'JobTitle': JobTitle,
+            'Technology': Technology,
+            'Field': Field,
+            'SkillUnique': SkillUnique,
+        }
+        model = model_map[model_name]
+
+        qs = model.objects.all().order_by('-usage_counts', '-created_at')[:50]
+        if q:
+            filter_kwargs = {f'{field_name}__icontains': q}
+            qs = model.objects.filter(**filter_kwargs).order_by('-usage_counts', '-created_at')[:50]
+
+        data = [{field_name: getattr(obj, field_name), 'usage_counts': obj.usage_counts} for obj in qs]
+        return success_response(message="Suggestions", data=data, status_code=200)

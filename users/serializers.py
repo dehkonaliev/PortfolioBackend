@@ -103,7 +103,10 @@ class CreateAccountSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         validated_data.pop('conf_password')
+        token_email = validated_data['token'].temp_user.email
         validated_data.pop('token', None)
+        
+        validated_data['email'] = token_email
         
         user = CustomUser.objects.create_user(**validated_data)
         return user
@@ -185,26 +188,26 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = [
             'id', 'username', 'first_name', 'last_name', 'email',
-            'job_title', 'summary', 'address', 'phone_number', 'linkedin_url',
+            'job_title', 'summary', 'address', 'phone_number', 'linkedin_url', 'telegram_url',
             'profile_photo', 'profile_thumbnail',
             'experiences', 'languages', 'skills', 'educations', 'projects',
         ]
         read_only_fields = ['id', 'username', 'email', 'profile_thumbnail']
 
     def get_experiences(self, obj):
-        return ExperienceSerializer(obj.experiences.all(), many=True).data
+        return ExperienceSerializer(obj.experiences.all().order_by('-created_at'), many=True).data
 
     def get_languages(self, obj):
-        return LanguageSerializer(obj.languages.all(), many=True).data
+        return LanguageSerializer(obj.languages.all().order_by('-created_at'), many=True).data
 
     def get_skills(self, obj):
-        return SkillSerializer(obj.skills.all(), many=True).data
+        return SkillSerializer(obj.skills.all().order_by('-created_at'), many=True).data
 
     def get_educations(self, obj):
-        return EducationSerializer(obj.educations.all(), many=True).data
+        return EducationSerializer(obj.educations.all().order_by('-created_at'), many=True).data
 
     def get_projects(self, obj):
-        return ProjectSerializer(obj.projects.all(), many=True).data
+        return ProjectSerializer(obj.projects.all().order_by('-created_at'), many=True).data
 
 
 class UserUpdateSettingsSerializer(serializers.ModelSerializer):
@@ -214,8 +217,8 @@ class UserUpdateSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = [
-            'first_name', 'last_name', 'job_title', 'summary',
-            'address', 'phone_number', 'linkedin_url', 'profile_photo',
+            'first_name', 'last_name', 'job_title', 'summary', 'email',
+            'address', 'phone_number', 'linkedin_url', 'telegram_url', 'profile_photo',
         ]
 
     def validate_first_name(self, first_name):
@@ -227,6 +230,17 @@ class UserUpdateSettingsSerializer(serializers.ModelSerializer):
         if last_name and last_name.strip():
             return name_validator(last_name, "last_name")
         return last_name
+
+    def validate_email(self, email):
+        email = (email or '').strip()
+        if not email:
+            return field_error("email", "Email cannot be blank.")
+        queryset = CustomUser.objects.filter(email__iexact=email)
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+        if queryset.exists():
+            return field_error("email", "A user with this email already exists.")
+        return email
 
 
 class UserSearchSerializer(serializers.ModelSerializer):

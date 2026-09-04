@@ -13,6 +13,7 @@ class CustomUser(AbstractUser, BaseModel):
     address = models.CharField(max_length=300, null=True, blank=True)
     phone_number = models.CharField(max_length=15, null=True, blank=True)
     linkedin_url = models.URLField(null=True, blank=True)
+    telegram_url = models.URLField(null=True, blank=True)
     profile_photo = models.ImageField(upload_to='avatars/', blank=True, null=True)
     profile_thumbnail = models.ImageField(upload_to='avatars_thumb/', blank=True, null=True)
     
@@ -69,4 +70,22 @@ class Project(BaseModel):
 class MyToken(BaseModel):
     temp_user = models.ForeignKey(TempUser, on_delete=models.CASCADE, related_name='my_tokens')
     token = models.CharField(max_length=32, default=secrets.token_urlsafe(32))
+    
+    
+class JobTitle(BaseModel):
+    job_title = models.CharField(max_length=200, unique=True)
+    usage_counts = models.PositiveIntegerField(default=0)
+    
+class Technology(BaseModel):
+    technology = models.CharField(max_length=200, unique=True)
+    usage_counts = models.PositiveIntegerField(default=0)
+    
+class Field(BaseModel):
+    field = models.CharField(max_length=200, unique=True)
+    usage_counts = models.PositiveIntegerField(default=0)
+    
+class SkillUnique(BaseModel):
+    skill = models.CharField(max_length=200, unique=True)
+    usage_counts = models.PositiveIntegerField(default=0)
+    
     
