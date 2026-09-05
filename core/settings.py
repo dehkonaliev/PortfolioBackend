@@ -11,7 +11,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG") == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'dehkonaliev.uz']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'www.dehkonaliev.uz', 'dehkonaliev.uz']
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
@@ -24,6 +24,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://www.dehkonaliev.uz',
     'https://dehkonaliev.uz',
     'http://127.0.0.1:8000',
+    'https://portfoliobackend-md.up.railway.app/'
 ]
 # Application definition
 
