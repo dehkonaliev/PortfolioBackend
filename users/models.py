@@ -18,10 +18,13 @@ class CustomUser(AbstractUser, BaseModel):
     profile_thumbnail = models.ImageField(upload_to='avatars_thumb/', blank=True, null=True)
     
     
+def default_expiry():
+    return timezone.now() + timedelta(minutes=15)
+
 class TempUser(BaseModel):
     email = models.EmailField(max_length=100)
     code = models.IntegerField(blank=True, null=True)
-    expiry_time = models.DateTimeField(default=timezone.now() + timedelta(minutes=15))
+    expiry_time = models.DateTimeField(default=default_expiry)
 
 
 class Experience(BaseModel):
