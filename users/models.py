@@ -94,4 +94,7 @@ class SkillUnique(BaseModel):
     skill = models.CharField(max_length=200, unique=True)
     usage_counts = models.PositiveIntegerField(default=0)
     
+    def __str__(self):
+        return self.skill
+    
     
