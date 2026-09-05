@@ -17,14 +17,21 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'https://www.dehkonaliev.uz',
     'https://dehkonaliev.uz',
-    'https://curiosite.up.railway.app',
+    'https://portfoliobackend-md.up.railway.app',
+]
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173',
+    'https://www.dehkonaliev.uz',
+    'https://dehkonaliev.uz',
+    'https://portfoliobackend-md.up.railway.app',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'https://www.dehkonaliev.uz',
     'https://dehkonaliev.uz',
     'http://127.0.0.1:8000',
-    'https://portfoliobackend-md.up.railway.app/'
+    'https://portfoliobackend-md.up.railway.app'
 ]
 # Application definition
 
