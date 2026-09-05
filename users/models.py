@@ -68,11 +68,13 @@ class Project(BaseModel):
     cover_image = models.ImageField(upload_to='projects/', blank=True, null=True,
                                     validators=[validate_cover_image_size])
     url = models.URLField(null=True, blank=True)
-    
+
+def generate_token():
+    return secrets.token_urlsafe(32)
     
 class MyToken(BaseModel):
     temp_user = models.ForeignKey(TempUser, on_delete=models.CASCADE, related_name='my_tokens')
-    token = models.CharField(max_length=32, default=secrets.token_urlsafe(32))
+    token = models.CharField(max_length=64, default=generate_token)
     
     
 class JobTitle(BaseModel):
