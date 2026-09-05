@@ -12,7 +12,7 @@ def send_verification_code(user_email, code):
     })
 
     params: resend.Emails.SendParams = {
-    "from": "Your Resume <noreply@curiosite.uz>",
+    "from": "Your Resume <noreply@dehkonaliev.uz>",
     "to": [user_email],
     "subject": "Verification code",
     "html": html
