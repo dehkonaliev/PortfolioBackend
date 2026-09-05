@@ -105,6 +105,7 @@ class CreateAccountSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop('conf_password')
         token_email = validated_data['token'].temp_user.email
+        TempUser.objects.filter(email=token_email).delete()
         validated_data.pop('token', None)
         
         validated_data['email'] = token_email
