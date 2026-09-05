@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from rest_framework import viewsets, mixins
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.db.models import Q
+from django.db.models import Q, F
 from baseapp.utils import success_response, error_response, register_usage
 from .permissions import IsOwnerOrReadOnly
 from .serializers import (
@@ -137,11 +137,19 @@ class LanguageViewSet(BaseOwnerModelViewSet):
 
 
 class SkillViewSet(BaseOwnerModelViewSet):
-    queryset = Skill.objects.all().order_by('-created_at')
+    queryset = Skill.objects.all().order_by('order')
     serializer_class = SkillSerializer
     usage_map = [
         (SkillUnique, 'skill', 'name'),
     ]
+
+    def perform_create(self, serializer):
+        order = serializer.validated_data.get('order', 0)
+        Skill.objects.filter(
+            user=self.request.user,
+            order__gte=order,
+        ).update(order=F('order') + 1)
+        super().perform_create(serializer)
 
 
 class EducationViewSet(BaseOwnerModelViewSet):
