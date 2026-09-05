@@ -48,6 +48,7 @@ class Skill(BaseModel):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='skills')
     name = models.CharField(max_length=50)
     level = models.IntegerField()
+    order = models.PositiveIntegerField(default=0)
     
     
 class Education(BaseModel):

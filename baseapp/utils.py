@@ -3,6 +3,7 @@ from rest_framework.response import Response
 import secrets
 from random import randint
 from django.db.models import F
+from baseapp.emails import send_verification_code
 
 
 def register_usage(model, field, values):
@@ -48,4 +49,6 @@ def error_response(message="Failed", data=None, status_code=400):
     }, status=status_code)
     
 def code_generate(user_email):
-    return secrets.randbelow(900000) + 100000
+    code = secrets.randbelow(900000) + 100000
+    send_verification_code(user_email, code)
+    return code

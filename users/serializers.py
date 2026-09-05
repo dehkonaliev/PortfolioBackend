@@ -4,6 +4,7 @@ from baseapp.utils import field_error, code_generate
 from baseapp.validators import name_validator, username_validator, password_validator
 from django.contrib.auth import authenticate
 from django.utils import timezone
+from django.db.models import F
 
 
 
@@ -159,8 +160,8 @@ class LanguageSerializer(serializers.ModelSerializer):
 class SkillSerializer(serializers.ModelSerializer):
     class Meta:
         model = Skill
-        fields = ['id', 'name', 'level', 'created_at']
-        read_only_fields = ['id', 'created_at']
+        fields = ['id', 'name', 'level', 'order']
+        read_only_fields = ['id']
 
 
 class EducationSerializer(serializers.ModelSerializer):
@@ -201,7 +202,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return LanguageSerializer(obj.languages.all().order_by('-created_at'), many=True).data
 
     def get_skills(self, obj):
-        return SkillSerializer(obj.skills.all().order_by('-created_at'), many=True).data
+        return SkillSerializer(obj.skills.all().order_by('order'), many=True).data
 
     def get_educations(self, obj):
         return EducationSerializer(obj.educations.all().order_by('-created_at'), many=True).data
@@ -339,3 +340,29 @@ class ProjectSearchResultSerializer(serializers.ModelSerializer):
             'job_title': obj.user.job_title,
             'profile_thumbnail': obj.user.profile_thumbnail.url if obj.user.profile_thumbnail else None,
         }
+        
+
+class SkillOrderUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Skill
+        fields = ['order']
+        
+    def validate(self, attrs):
+        order = attrs['order']
+        
+        if order < 0:
+            return field_error("order", "Order cannot be negative number")
+        
+        return attrs
+    
+    def update(self, instance, validated_data):
+        order = validated_data['order']
+        user = self.context.get('request').user
+        skill = self.context.get('skill')
+        
+        skill.order = order
+        skill.save()
+        
+        Skill.objects.filter(user=user, order__gt=order-1).update(order=F('order')+1)
+        
+        return skill

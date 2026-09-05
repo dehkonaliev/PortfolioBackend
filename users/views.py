@@ -18,6 +18,7 @@ from .serializers import (
     UserProfileSerializer, UserUpdateSettingsSerializer,
     UserSearchSerializer, ChangePasswordSerializer,
     SearchUserResultSerializer, ProjectSearchResultSerializer,
+    SkillOrderUpdateSerializer,
 )
 
 
@@ -395,3 +396,18 @@ class SuggestionAPIView(APIView):
 
         data = [{field_name: getattr(obj, field_name), 'usage_counts': obj.usage_counts} for obj in qs]
         return success_response(message="Suggestions", data=data, status_code=200)
+
+
+class ReorderSkillAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    def patch(self, request, pk):
+        skill = Skill.objects.filter(pk=pk).first()
+        if not skill:
+            return error_response(message="Skill not found", status_code=404)
+        serializer = SkillOrderUpdateSerializer(instance=skill, data=request.data, partial=True,
+            context={'request':request, 'skill': skill}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        return success_response(message="Reordered")
