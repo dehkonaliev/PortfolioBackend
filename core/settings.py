@@ -160,9 +160,6 @@ STATIC_URL = 'static/'
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Public base URL of the frontend (used for prerendered social previews)
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://myresume.uz')
-
 RESEND_API_KEY = os.environ.get('RESEND_API_KEY')
 
 

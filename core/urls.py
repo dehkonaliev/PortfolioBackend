@@ -15,11 +15,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include, re_path
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-
-from core.views import SocialPreviewView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,10 +26,3 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-# Catch-all for social crawlers: serves a pre-rendered page with Open Graph
-# meta tags for the frontend routes (e.g. https://myresume.uz/dehkonaliev).
-# Only crawler requests are proxied here by nginx; browsers never reach it.
-urlpatterns += [
-    re_path(r'^(?!api/|admin/|media/).*', SocialPreviewView.as_view()),
-]
