@@ -17,6 +17,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'https://www.dehkonaliev.uz',
     'https://dehkonaliev.uz',
+    'https://myresume.uz',
     'https://portfoliobackend-md.up.railway.app',
 ]
 
