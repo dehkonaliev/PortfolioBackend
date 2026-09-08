@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, TempUser, MyToken, Experience, Language, Skill, Education, Project
+from .models import CustomUser, TempUser, MyToken, Experience, Language, Skill, Education, Project, Endorsement
 from baseapp.utils import field_error, code_generate
 from baseapp.validators import name_validator, username_validator, password_validator
 from django.contrib.auth import authenticate
@@ -179,6 +179,13 @@ class ProjectSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at']
 
 
+class EndorsementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Endorsement
+        fields = ['id', 'author_name', 'author_title', 'text', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+
 class UserProfileSerializer(serializers.ModelSerializer):
     experiences = serializers.SerializerMethodField()
     languages = serializers.SerializerMethodField()
@@ -191,7 +198,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'username', 'first_name', 'last_name', 'email',
             'job_title', 'summary', 'address', 'phone_number', 'linkedin_url', 'telegram_url',
-            'profile_photo', 'profile_thumbnail',
+            'profile_photo', 'profile_thumbnail', 'resume_file',
             'experiences', 'languages', 'skills', 'educations', 'projects',
         ]
         read_only_fields = ['id', 'username', 'email', 'profile_thumbnail']
@@ -215,12 +222,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class UserUpdateSettingsSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(required=False, allow_blank=True)
     last_name = serializers.CharField(required=False, allow_blank=True)
+    resume_file = serializers.FileField(required=False, allow_null=True, max_length=200)
 
     class Meta:
         model = CustomUser
         fields = [
             'first_name', 'last_name', 'job_title', 'summary', 'email',
-            'address', 'phone_number', 'linkedin_url', 'telegram_url', 'profile_photo',
+            'address', 'phone_number', 'linkedin_url', 'telegram_url',
+            'profile_photo', 'resume_file',
         ]
 
     def validate_first_name(self, first_name):

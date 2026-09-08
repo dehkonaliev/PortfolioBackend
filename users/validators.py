@@ -11,3 +11,9 @@ def validate_certification_size(file):
     max_bytes = 10 * 1024 * 1024
     if file.size > max_bytes:
         raise ValidationError("Certification file size must be under 10MB.")
+
+
+def validate_resume_file_size(file):
+    max_bytes = 10 * 1024 * 1024
+    if file.size > max_bytes:
+        raise ValidationError("Resume file size must be under 10MB.")

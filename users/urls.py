@@ -5,7 +5,7 @@ from .views import (
     CreateTempUserAPIView, CreateAccountAPIView, VerifyCodeAPIView,
     LoginAPIView, LogoutAPIView,
     ExperienceViewSet, LanguageViewSet, SkillViewSet,
-    EducationViewSet, ProjectViewSet,
+    EducationViewSet, ProjectViewSet, EndorsementViewSet,
     MyProfileAPIView, UserProfileAPIView, UserProfileByUsernameAPIView,
     UpdateSettingsAPIView,
     ChangePasswordAPIView, DeleteAccountAPIView, UserSearchAPIView,
@@ -20,6 +20,7 @@ router.register('languages', LanguageViewSet, basename='language')
 router.register('skills', SkillViewSet, basename='skill')
 router.register('educations', EducationViewSet, basename='education')
 router.register('projects', ProjectViewSet, basename='project')
+router.register('endorsements', EndorsementViewSet, basename='endorsement')
 
 
 urlpatterns = [

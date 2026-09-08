@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from .models import (
     CustomUser, Project, Education, Experience, Skill, Language,
-    JobTitle, Technology, Field, SkillUnique,
+    JobTitle, Technology, Field, SkillUnique, Endorsement,
 )
 from rest_framework.views import APIView
 from rest_framework import viewsets, mixins
@@ -14,7 +14,7 @@ from .serializers import (
     TempUserSerializer, CreateAccountSerializer, VerifyCodeSerializer,
     LoginSerializer, LogoutSerializer,
     ExperienceSerializer, LanguageSerializer, SkillSerializer,
-    EducationSerializer, ProjectSerializer,
+    EducationSerializer, ProjectSerializer, EndorsementSerializer,
     UserProfileSerializer, UserUpdateSettingsSerializer,
     UserSearchSerializer, ChangePasswordSerializer,
     SearchUserResultSerializer, ProjectSearchResultSerializer,
@@ -166,6 +166,11 @@ class ProjectViewSet(BaseOwnerModelViewSet):
     usage_map = [
         (Technology, 'technology', 'technologies'),
     ]
+
+
+class EndorsementViewSet(BaseOwnerModelViewSet):
+    queryset = Endorsement.objects.all().order_by('-created_at')
+    serializer_class = EndorsementSerializer
 
 
 class MyProfileAPIView(APIView):

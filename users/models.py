@@ -4,7 +4,7 @@ from baseapp.models import BaseModel
 from django.utils import timezone
 from datetime import timedelta
 import secrets
-from .validators import validate_cover_image_size, validate_certification_size
+from .validators import validate_cover_image_size, validate_certification_size, validate_resume_file_size
 
 
 class CustomUser(AbstractUser, BaseModel):
@@ -16,6 +16,7 @@ class CustomUser(AbstractUser, BaseModel):
     telegram_url = models.URLField(null=True, blank=True)
     profile_photo = models.ImageField(upload_to='avatars/', blank=True, null=True)
     profile_thumbnail = models.ImageField(upload_to='avatars_thumb/', blank=True, null=True)
+    resume_file = models.FileField(upload_to='resumes/', blank=True, null=True, validators=[validate_resume_file_size])
     
     
 def default_expiry():
@@ -69,6 +70,13 @@ class Project(BaseModel):
     cover_image = models.ImageField(upload_to='projects/', blank=True, null=True,
                                     validators=[validate_cover_image_size])
     url = models.URLField(null=True, blank=True)
+
+
+class Endorsement(BaseModel):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='endorsements')
+    author_name = models.CharField(max_length=200)
+    author_title = models.CharField(max_length=200, blank=True, null=True)
+    text = models.CharField(max_length=2000)
 
 def generate_token():
     return secrets.token_urlsafe(32)
