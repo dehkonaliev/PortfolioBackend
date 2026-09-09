@@ -10,7 +10,7 @@ from .views import (
     UpdateSettingsAPIView,
     ChangePasswordAPIView, DeleteAccountAPIView, UserSearchAPIView,
     FilterUserSearchAPIView, ProjectSearchAPIView,
-    SuggestionAPIView, ReorderSkillAPIView
+    SuggestionAPIView, ReorderSkillAPIView, FeedbackAPIView
 )
 
 
@@ -42,6 +42,7 @@ urlpatterns = [
     path('change-password', ChangePasswordAPIView.as_view()),
     path('delete-account', DeleteAccountAPIView.as_view()),
     path('reorder-skill/<uuid:pk>', ReorderSkillAPIView.as_view()),
+    path('feedback', FeedbackAPIView.as_view()),
 
     path('', include(router.urls)),
 ]

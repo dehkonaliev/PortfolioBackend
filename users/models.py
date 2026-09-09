@@ -106,3 +106,9 @@ class SkillUnique(BaseModel):
         return self.skill
     
     
+class Feedback(BaseModel):
+    user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
+    content = models.CharField(max_length=2000)
+    is_read = models.BooleanField(default=False)
+    
+    

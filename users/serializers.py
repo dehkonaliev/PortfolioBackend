@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, TempUser, MyToken, Experience, Language, Skill, Education, Project, Endorsement
+from .models import CustomUser, TempUser, MyToken, Experience, Language, Skill, Education, Project, Endorsement, Feedback
 from baseapp.utils import field_error, code_generate
 from baseapp.validators import name_validator, username_validator, password_validator
 from django.contrib.auth import authenticate
@@ -376,3 +376,15 @@ class SkillOrderUpdateSerializer(serializers.ModelSerializer):
         Skill.objects.filter(user=user, order__gt=order-1).update(order=F('order')+1)
         
         return skill
+    
+class FeedbackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Feedback
+        fields = ['id', 'content']
+        read_only_fields = ['id']  
+        
+    def create(self, validated_data):
+        validated_data['user'] = self.context.get('request').user
+        
+        return Feedback.objects.create(**validated_data)
+        

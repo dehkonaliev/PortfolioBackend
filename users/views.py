@@ -18,7 +18,7 @@ from .serializers import (
     UserProfileSerializer, UserUpdateSettingsSerializer,
     UserSearchSerializer, ChangePasswordSerializer,
     SearchUserResultSerializer, ProjectSearchResultSerializer,
-    SkillOrderUpdateSerializer,
+    SkillOrderUpdateSerializer, FeedbackSerializer
 )
 
 
@@ -424,3 +424,13 @@ class ReorderSkillAPIView(APIView):
         serializer.save()
         
         return success_response(message="Reordered")
+    
+class FeedbackAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        serializer = FeedbackSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        return success_response(message="Feedback sent", data=serializer.data, status_code=201)
+    
