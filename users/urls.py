@@ -12,6 +12,12 @@ from .views import (
     FilterUserSearchAPIView, ProjectSearchAPIView,
     SuggestionAPIView, ReorderSkillAPIView, FeedbackAPIView
 )
+from .sitemaps import ProductSitemap
+from django.contrib.sitemaps.views import sitemap
+
+sitemaps = {
+    "products": ProductSitemap,
+}
 
 
 router = DefaultRouter()
@@ -43,6 +49,7 @@ urlpatterns = [
     path('delete-account', DeleteAccountAPIView.as_view()),
     path('reorder-skill/<uuid:pk>', ReorderSkillAPIView.as_view()),
     path('feedback', FeedbackAPIView.as_view()),
+    path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
 
     path('', include(router.urls)),
 ]
