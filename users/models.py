@@ -12,11 +12,23 @@ class CustomUser(AbstractUser, BaseModel):
     summary = models.CharField(max_length=2000, null=True, blank=True)
     address = models.CharField(max_length=300, null=True, blank=True)
     phone_number = models.CharField(max_length=15, null=True, blank=True)
-    linkedin_url = models.URLField(null=True, blank=True)
-    telegram_url = models.URLField(null=True, blank=True)
     profile_photo = models.ImageField(upload_to='avatars/', blank=True, null=True)
     profile_thumbnail = models.ImageField(upload_to='avatars_thumb/', blank=True, null=True)
     resume_file = models.FileField(upload_to='resumes/', blank=True, null=True, validators=[validate_resume_file_size])
+
+
+class SocialLink(BaseModel):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='social_links')
+    website_url = models.URLField(null=True, blank=True)
+    github_url = models.URLField(blank=True, null=True)
+    linkedin_url = models.URLField(null=True, blank=True)
+    telegram_url = models.URLField(null=True, blank=True)
+    behance_url = models.URLField(null=True, blank=True)
+    figma_url = models.URLField(null=True, blank=True)
+    
+    
+    
+    
     
     
 def default_expiry():

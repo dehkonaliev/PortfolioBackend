@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from .models import (
     CustomUser, Project, Education, Experience, Skill, Language,
-    JobTitle, Technology, Field, SkillUnique, Endorsement,
+    JobTitle, Technology, Field, SkillUnique, Endorsement, SocialLink,
 )
 from rest_framework.views import APIView
 from rest_framework import viewsets, mixins
@@ -18,7 +18,7 @@ from .serializers import (
     UserProfileSerializer, UserUpdateSettingsSerializer,
     UserSearchSerializer, ChangePasswordSerializer,
     SearchUserResultSerializer, ProjectSearchResultSerializer,
-    SkillOrderUpdateSerializer, FeedbackSerializer
+    SkillOrderUpdateSerializer, FeedbackSerializer, SocialLinkSerializer
 )
 
 
@@ -206,13 +206,31 @@ class UserProfileByUsernameAPIView(APIView):
 class UpdateSettingsAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
+    SOCIAL_LINK_FIELDS = ['website_url', 'github_url', 'linkedin_url', 'telegram_url', 'behance_url', 'figma_url']
+
     def patch(self, request):
         serializer = UserUpdateSettingsSerializer(request.user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         if request.data.get('job_title'):
             register_usage(JobTitle, 'job_title', request.data.get('job_title'))
-        return success_response(message="Settings updated", data=serializer.data, status_code=200)
+
+        social_data = {
+            field: request.data.get(field)
+            for field in self.SOCIAL_LINK_FIELDS
+            if field in request.data
+        }
+        if social_data:
+            social, _ = SocialLink.objects.get_or_create(user=request.user)
+            for field, value in social_data.items():
+                setattr(social, field, value or '')
+            social.save()
+
+        data = serializer.data
+        social = SocialLink.objects.filter(user=request.user).first()
+        if social:
+            data['social_links'] = SocialLinkSerializer(social).data
+        return success_response(message="Settings updated", data=data, status_code=200)
 
 
 class ChangePasswordAPIView(APIView):

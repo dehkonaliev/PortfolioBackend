@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, TempUser, MyToken, Experience, Language, Skill, Education, Project, Endorsement, Feedback
+from .models import CustomUser, SocialLink, TempUser, MyToken, Experience, Language, Skill, Education, Project, Endorsement, Feedback
 from baseapp.utils import field_error, code_generate
 from baseapp.validators import name_validator, username_validator, password_validator
 from django.contrib.auth import authenticate
@@ -186,19 +186,27 @@ class EndorsementSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at']
 
 
+class SocialLinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SocialLink
+        fields = ['website_url', 'github_url', 'linkedin_url', 'telegram_url', 'behance_url', 'figma_url']
+
+
 class UserProfileSerializer(serializers.ModelSerializer):
     experiences = serializers.SerializerMethodField()
     languages = serializers.SerializerMethodField()
     skills = serializers.SerializerMethodField()
     educations = serializers.SerializerMethodField()
     projects = serializers.SerializerMethodField()
+    social_links = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomUser
         fields = [
             'id', 'username', 'first_name', 'last_name', 'email',
-            'job_title', 'summary', 'address', 'phone_number', 'linkedin_url', 'telegram_url',
+            'job_title', 'summary', 'address', 'phone_number',
             'profile_photo', 'profile_thumbnail', 'resume_file',
+            'social_links',
             'experiences', 'languages', 'skills', 'educations', 'projects',
         ]
         read_only_fields = ['id', 'username', 'email', 'profile_thumbnail']
@@ -218,6 +226,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
     def get_projects(self, obj):
         return ProjectSerializer(obj.projects.all().order_by('-created_at'), many=True).data
 
+    def get_social_links(self, obj):
+        links = getattr(obj, 'social_links', None)
+        if not links:
+            return None
+        return SocialLinkSerializer(links).data
+
 
 class UserUpdateSettingsSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(required=False, allow_blank=True)
@@ -228,7 +242,7 @@ class UserUpdateSettingsSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = [
             'first_name', 'last_name', 'job_title', 'summary', 'email',
-            'address', 'phone_number', 'linkedin_url', 'telegram_url',
+            'address', 'phone_number',
             'profile_photo', 'resume_file',
         ]
 
